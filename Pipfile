@@ -6,12 +6,11 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-dash = "==1.9.1"
+dash = "*"
 dash-bootstrap-components = "*"
 gunicorn = "*"
 plotly = "*"
 pandas = "*"
-matplotlib = "*"
 
 [requires]
-python_version = "3"
+python_version = "3.8"

@@ -9,7 +9,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
-import matplotlib.pyplot as plt
 token = 'pk.eyJ1IjoiZHJld3J1c3QxIiwiYSI6ImNrOGxxMXQxbDBlaDIzbG56MjFnM2VxZGMifQ.FTGX44CylOAZSO_WHYsP1g'
 px.set_mapbox_access_token(token)
 
