@@ -17,6 +17,10 @@ column1 = dbc.Col(
         
             ## Process
 
+            Work in progress..
+
+            This will just be some of the ways I went about programming the site 
+            and how things were built.
 
             """
         ),

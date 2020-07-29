@@ -16,29 +16,46 @@ column1 = dbc.Col(
         dcc.Markdown(
             """
         
-            ## Your Value Proposition
+            ## Let's Take a Look at Bird Populations..
 
-            Emphasize how the app will benefit users. Don't emphasize the underlying technology.
 
-            ✅ RUN is a running app that adapts to your fitness levels and designs personalized workouts to help you improve your running.
+            ##### ..Using census data gathered by the North American Breeding Bird Survey such as census route counts by location and year. 
+            
 
-            ❌ RUN is the only intelligent running app that uses sophisticated deep neural net machine learning to make your run smarter because we believe in ML driven workouts.
+            Ultimately this app will be able to show if a species 
+            is going up or down in population and help raise awareness about bird populations.
+            We can use this app to predict when a population will be endangered,
+            or hopefully see successful bird conservation stories or adaptations.
+
+            This App is still a work in progress..
 
             """
         ),
-        dcc.Link(dbc.Button('Your Call To Action', color='primary'), href='/predictions')
+        dcc.Link(dbc.Button("Bird Census Map", color='primary'), href='/route_map_counts')
     ],
     md=4,
 )
 
-gapminder = px.data.gapminder()
-fig = px.scatter(gapminder.query("year==2007"), x="gdpPercap", y="lifeExp", size="pop", color="continent",
-           hover_name="country", log_x=True, size_max=60)
+# gapminder = px.data.gapminder()
+# fig = px.scatter(gapminder.query("year==2007"), x="gdpPercap", y="lifeExp", size="pop", color="continent",
+#            hover_name="country", log_x=True, size_max=60)
+
+
+
+# column2 = dbc.Col(
+#     [
+#         dcc.Graph(figure=fig),
+#     ]
+# )
+
+# layout = dbc.Row([column1, column2])
 
 column2 = dbc.Col(
+    # https://unsplash.com/photos/T6zSVMTUU0Q
     [
-        dcc.Graph(figure=fig),
+        html.Img(src='assets/photographer-jim-strasma-unsplash.jpg', className='img-fluid')
     ]
 )
+
 
 layout = dbc.Row([column1, column2])
