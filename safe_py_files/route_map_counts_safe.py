@@ -2,7 +2,6 @@
 import dash
 import glob
 import plotly
-import json
 import numpy as np
 import pandas as pd
 import dash_bootstrap_components as dbc
@@ -16,8 +15,8 @@ px.set_mapbox_access_token(token)
 # Imports from this application
 from app import app
 
-
-
+# 2 column layout. 1st column width = 4/12
+# https://dash-bootstrap-components.opensource.faculty.ai/l/components/layout
 
 
 url = 'routes/routes.csv'
@@ -108,8 +107,7 @@ class Bird:
                           mapbox_style = "light", color = "SpeciesTotal", size = "SpeciesTotal", 
                           text = "RouteName", hover_name = "text", 
                           color_continuous_scale = px.colors.sequential.Rainbow, opacity = 0.3, 
-                          size_max=25, zoom = 4.5, center= {"lat": 39.25, "lon": -84.8})
-    fig.update_layout(clickmode='event+select')
+                          size_max=25, zoom = 5, center= {"lat": 39.25, "lon": -84.8}, width = 700, height = 500)
     return fig
 
 class Route(Bird):
@@ -148,7 +146,7 @@ class Route(Bird):
   @classmethod
   def year_graph(cls, df):
     # df["SpeciesTotal"] = df["SpeciesTotal"].astype(float).astype(int)
-    fig = px.bar(df, y='SpeciesTotal', x='Year', text='SpeciesTotal')
+    fig = px.bar(df, y='SpeciesTotal', x='Year', text='SpeciesTotal', width=700, height=500)
     fig.update_traces(texttemplate='%{text:.1s}', textposition='outside')
     fig.update_layout(uniformtext_minsize=10, uniformtext_mode='show')
     return fig
@@ -198,59 +196,55 @@ class Years(Bird):
 
 
 
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
+
+#### YOU NEED YOUR OBJECTS TO TO BE CHANGABLE
+# bird_obj = Bird(3390, 2009, 2018)
+# bird_obj_inst = bird_obj.get_state_data()
+# AOU_num = bird_obj_inst.at[0, "AOU"]
+# print("This map is showing route counts for bird species id " + str(AOU_num))
+# bird_obj_inst_grph = Bird.map_graph(bird_obj_inst)
+
+# route_obj = Route(3390, 1966, 2018, "SHILOH") 
+# route_obj_inst = route_obj.get_route_data()
+# route_name = route_obj_inst.at[0, "RouteName"]
+# print("This bar plot is showing all the available yearly counts for route " + str(route_name))
+# route_obj_inst_grph = Route.year_graph(route_obj_inst)
 
 
 
-#### Container
-layout = dbc.Container(
+column1 = dbc.Col(
     [
+        dcc.Markdown(
+            """
+        
+            ## Bird Census Route Counts
 
-#### Trying out html header instead of markdown
-      html.Div(
-        [
-          dbc.Row(dbc.Col(
-              [html.H2('Bird Census Route Counts:', className="text-info mb-4"),
-              html.H5('Data From The Breeding Bird Survey')]
-                  ,xs=12, sm=12, md=12, lg=8, xl=10), justify="center", className="mb-3")
-                  ],
-                ),
-
-
-#### Explanation of site in markdown
-#### A way to put a space in markdown:  &nbsp;
-      html.Div(
-        [
-          dbc.Row(dbc.Col(
-            dcc.Markdown(
-                """
-
-                The Breeding Bird Survey is an ongoing census of North American Birds.
-                First use the range slider to choose the years you would like to look at.  Next, select
-                a species of bird or view the current one. 
-                
-                Finally, zoom in on the route names and choose a route name. Spell it correctly 
-                in the text field to see your selected yearly totals for that route.
-                It should add up to the route total count for the years you're looking at.  Some
-                years no birds are counted and of course some routes have bigger bird populations.
-                """
-                      ),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
+            The Breeding Bird Survey is an ongoing census of North American Birds.
+            First use the range slider to choose the years you would like to look at.  Next, select
+            a species of bird or view the current one. 
+            
+            Finally, zoom in on the route names and choose a route name. Spell it correctly 
+            in the text field to see your selected yearly totals for that route.
+            It should add up to the route total count for the years you're looking at.  Some
+            years no birds are counted and of course some routes have bigger bird populations.
+            """
+        ),
+    #### This is a working copy but I improved it down below even though the Div was ..
+    #### ... acting weird for the range slider it works
+    # html.Div([
+    # html.Label('Years:')], 
+    # style={'marginBottom': 15, 'marginTop': 25}),
+    # dcc.RangeSlider(
+    #   id="range_slider",
+    #   marks={i: '{}'.format(i) for i in range(1968, 2019, 10)},
+    #   min=1966,
+    #   max=2018,
+    #   value=[1966, 2018]
+    #   ),
 
 
-
-#### Year Range Selector
-html.Div(
-  [
-    dbc.Row(dbc.Col(
     html.Div([
-    html.H4('Years:', className="text-info mb-4"), 
+    html.H5('Years:'), 
     html.Div([
     dcc.RangeSlider(
       id="range_slider_year",
@@ -261,199 +255,233 @@ html.Div(
       ),
       ], style={'marginBottom': 20, 'marginTop': 20}),
       html.Div(id='output-container-range-slider')
-    ], style={'marginBottom': 5, 'marginTop': 25}
-    ), xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-    ], style={'marginBottom': 5, 'marginTop': -30}
-    ),
-                
+    ], style={'marginBottom': 25, 'marginTop': 25}),
 
-
-
-#### Bird Selection: Needs more birds
-html.Div([dbc.Row(dbc.Col(
+#### NEED MORE BIRDS
     html.Div([
-    html.H5('Species:', className="text-info"),
+    html.H5('Species:'),
     dcc.Dropdown(
       id="drop_down_bird",
       options=[
-            {'label': "American Goldfinch 5290", 'value': 5290},
-            {'label': "Carolina Chikadee 7360", 'value': 7360},
-            {'label': "Cooper's Hawk 3330", 'value': 3330},
-            {'label': "Eastern Bluebird 7660", 'value': 7660},
-            {'label': "Kentucky Warbler 6770", 'value': 6770},
-            {'label': "Northern Bobwhite 2890", 'value': 2890},
-            {'label': "Prothonotary Warbler (Golden Swamp Warbler) 6370", 'value': 6370},  
-            {'label': "Red Tailed Hawk 3370", 'value': 3370},
-            {'label': "Red Shouldered Hawk 3390", 'value': 3390},
-            {'label': "Ruby Throated Hummingbird 4280", 'value': 4280}
+            {'label': "American Goldfinch", 'value': 5290},
+            {'label': "Carolina Chikadee", 'value': 7360},
+            {'label': "Cooper's Hawk", 'value': 3330},
+            {'label': "Eastern Bluebird", 'value': 7660},
+            {'label': "Kentucky Warbler", 'value': 6770},
+            {'label': "Northern Bobwhite", 'value': 2890},
+            {'label': "Prothonotary Warbler (Golden Swamp Warbler)", 'value': 6370},  
+            {'label': "Red Tailed Hawk", 'value': 3370},
+            {'label': "Red Shouldered Hawk", 'value': 3390},
+            {'label': "Ruby Throated Hummingbird", 'value': 4280}
         ],
       value=5290,
-      style={"margin-top": "25px", "margin-bottom": "30px"}
+      style={"margin-top": "15px", "margin-bottom": "20px"}
     ),
     html.Div(id='output-container-drop-down')
-   ], style={'marginBottom': 35, 'marginTop': 25}
-   ),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
+   ], style={'marginBottom': 25, 'marginTop': 25}),
 
-#### First Graph
-      html.Div(
-        [
-          dbc.Row(dbc.Col(
-   html.Div([
-             dcc.Graph(id="map_route_counts"),
-   ],),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
-
-#### Map Click Data of Route Clicked
-html.Div(
-      [
-        dbc.Row(dbc.Col(
-      
-      html.Div([
-            html.Pre(id='click-data', style=styles['pre']),
-        ], 
-        ),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-        ],
-        ),
-
-
-
-#### Route input
-  html.Div([
-  dbc.Row(dbc.Col(
-  html.Div([
-  html.Div([
-    html.H4('Route:', className="text-info"),
-    html.H5("Click a route above on the map to see info.", className="mt-3"),
-    html.H5("Next type it in below."),
-      dcc.Input(
-        value="CUMBERLND GP",
-        id="text_input_route", 
-        type='text', 
-        style={"margin-top": "15px", "margin-bottom": "25px"}
-              ),
-  html.Div(id='output-container-route-input')
-        ], 
-    style={'marginBottom': 35, 'marginTop': 25}
-        ),
-    html.Div(id='route-count-total')
-            ], 
-    style={'marginBottom': 5, 'marginTop': 25}
-            ),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
-
-#### Reload Graphs Button
-html.Div([
-dbc.Row(dbc.Col(
+# html.Div([
 html.Div([
   html.Div([
-    html.H5('Re-load Graphs:', className="text-info")
-          ], 
-          style={'marginBottom': 25, 'marginTop': 10}),
-          html.Div([
-  # html.Button('Submit', id='button'),
-  dbc.Button("Submit New Graphs", size="lg", id='submit_button', color='info', className="mr-1"),
-          ],
-          style={'marginBottom': 25, 'marginTop': 25}),
-  html.Div(id='output-container-route-button')
-        ], 
-          style={'marginBottom': 30, 'marginTop': 25}),
-            xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
-
-
-#### Second Graph
-      html.Div(
-        [
-          dbc.Row(dbc.Col(
-           
+    html.H5('Route:')
+    ]),
+    dcc.Input(
+     value="Type in Route Here",
+     id="text_input_route", 
+     type='text', 
+    #  style={"margin-top": "15px", "margin-bottom": "25px", "margin-left": "20px"}
+    style={"margin-top": "15px", "margin-bottom": "25px"}
+     ),
+   html.Div(id='output-container-route-input')
+    ], style={'marginBottom': 25, 'marginTop': 25}),
+    #   html.Div(id='output_container_route_sum')
+    # ], style={'marginBottom': 25, 'marginTop': 25}),
+    # html.H6('Route Total: ', className='mb-5'), 
     html.Div([
-      dcc.Graph(id="yearly_graph_counts"),
-            ],
-                      ),xs=12, sm=12, md=12, lg=8, xl=10), justify="center")
-                  ],
-                ),
+    html.Div(id='route-count-total')], 
+    style={'marginBottom': 25, 'marginTop': 25}),
+
+        dcc.Markdown(
+            """
+        
+            ##### Work in Progress..
+
+            I've only included a beginning number bird species at this stage of the app development.
+            I would ultimately like to include all US States and Canadian Provinces.  
+            The program should run for all state, province, and territory files 
+            and ideally will be able to make predictions on future populations.
+            """
+        ),
 
 
-#### End of Container
+    ],
+    md=4,
+)
+
+
+###### IMPORTANT this is where you call the dataframe if you use it
+# gapminder = px.data.gapminder()
+# fig = px.scatter(gapminder.query("year==2007"), x="gdpPercap", y="lifeExp", size="pop", color="continent",
+#            hover_name="country", log_x=True, size_max=60)
+
+
+column2 = dbc.Col(
+    [
+        ###### IMPORTANT
+        # dcc.Graph(figure=graph1),
+        # dcc.Graph(figure=map_red_shldr),
+        dcc.Graph(id="map_route_counts"),
+        dcc.Graph(id="yearly_graph_counts"),
+        # html.Div([
+        # html.Label("Route total cout: ", id="route_total_sum")
+        # ]),
+        # dcc.Graph(id="graph-with-input-box"),
     ]
 )
 
-#### Callbacks and updates of both graphs
+# The input variables and the parameters don't have to match it's just an indexed list
+# but I find it easier
 @app.callback(
+    #### This works but added the other output and input
+    # Output('map_route_counts', 'figure'),
+    # [Input('range_slider_year', 'value'),
+    # Input('drop_down_bird', 'value')])
+
+    #### Trying to figure out why the yearly outputs aren't working
+    #### route_total_sum doesn't work (I want to the route total sum to print out next to route and to update)
+    
+    # [Output('map_route_counts', 'figure'),
+    # Output('yearly_graph_counts', 'figure'),
+    # dash.dependencies.Output('route_total_sum', 'value')],
+    # [Input('range_slider_year', 'value'),
+    # Input('drop_down_bird', 'value'),
+    # Input('text_input_route', 'value')])
+
     [Output('map_route_counts', 'figure'),
     Output('yearly_graph_counts', 'figure')],
     [Input('range_slider_year', 'value'),
     Input('drop_down_bird', 'value'),
     Input('text_input_route', 'value')])
+
+    # [Output('map_route_counts', 'figure'),
+    # Output('yearly_graph_counts', 'figure'),
+    # Output('route_total_sum', 'value')],
+    # [Input('range_slider_year', 'value'),
+    # Input('drop_down_bird', 'value'),
+    # Input('text_input_route', 'value')])
+
+    # Output('yearly_graph_counts', 'figure'),
+    # [Input('range_slider_year', 'value'),
+    # Input('drop_down_bird', 'value'),
+    # Input('text_input_route', 'value')])
+
 def update_figure(range_slider_year, drop_down_bird, text_input_route):
+    #### Trying to figure out if the years can work with the routes graph
     bird_object = Bird(drop_down_bird, range_slider_year[0], range_slider_year[1])
     bird_instance = bird_object.get_state_data()
     bird_map_instance = Bird.map_graph(bird_instance)
     bird_map_instance.update_layout(transition_duration=500)
+    #### This would go with the code above if I only had the bird object (map_route_counts)
+    # return bird_map_instance
 
     route_object = Route(drop_down_bird, range_slider_year[0], range_slider_year[1], text_input_route) 
     route_instance = route_object.get_route_data()
     
+    #### Doesn't work get route total count
+    # route_total = Route.route_sum(route_instance)
+    # route_total.update_layout(transition_duration=500)
+    # route_total_print = ("This is the route count sum: " + str(route_total))
+    #### Doesn't work
+    
+    # route_total.update_layout(transition_duration=500)
+    #### This is what I'm working on I want it to get the total route count for the years selected
+    #### So it matches with the map graph
     route_graph_instance = Route.year_graph(route_instance)
     route_graph_instance.update_layout(transition_duration=500)
     return bird_map_instance, route_graph_instance
+    # return bird_map_instance, route_graph_instance, route_total
+    # return route_graph_instance
 
 
-#### Callbacks and updates of route counts
 @app.callback(
     Output('route-count-total', 'children'),
     [Input('range_slider_year', 'value'),
     Input('drop_down_bird', 'value'),
-    Input('text_input_route', 'value')])
+    Input('text_input_route', 'value')],
+)
 def update_count(range_slider_year, drop_down_bird, text_input_route):
     route_object = Route(drop_down_bird, range_slider_year[0], range_slider_year[1], text_input_route) 
     route_instance = route_object.get_route_data()
     route_total = Route.route_sum(route_instance)
-    return f'{route_total:.0f} species were counted.'
+    return f'{route_total:.0f} species were counted'
 
-#### Callback and update of year selector
+
+
+#### could probably add all these together but it works just fine for now
 @app.callback(
     dash.dependencies.Output('output-container-range-slider', 'children'),
     [dash.dependencies.Input('range_slider_year', 'value')])
 def update_slider(value):
-    return ("You have selected the years " + str(value[0]) + " through " + str(value[1]) + ".")
+    return ("You have selected the years " + str(value[0]) + " through " + str(value[1]))
 
-#### Callback and update of selected bird
 @app.callback(
     dash.dependencies.Output('output-container-drop-down', 'children'),
     [dash.dependencies.Input('drop_down_bird', 'value')])
 def update_drop_down(value):
-    return ("You have selected bird AOU # " + str(value) + ".")
+    return ("You have selected bird AOU # " + str(value))
 
-#### Callback and update of Route that was entered
 @app.callback(
     dash.dependencies.Output('output-container-route-input', 'children'),
     [dash.dependencies.Input('text_input_route', 'value')])
 def update_route_input(value):
-    return ("Route entered: " + str(value) + ".")
+    return ("Route entered: " + str(value))
 
-#### Callback and update of button 
-@app.callback(
-    dash.dependencies.Output('output-container-route-button', 'children'),
-    [dash.dependencies.Input('submit_button', 'n_clicks')],
-    [dash.dependencies.State('text_input_route', 'value'),
-    dash.dependencies.State('drop_down_bird', 'value')])
-def update_output(n_clicks, route_input, bird_input):
-    return u'''
-    You have selected bird AOU {}, the route {}, and the button was clicked {} times.
-    '''.format(bird_input, route_input, n_clicks)
+#### Doesn't work
+# @app.callback(
+#     dash.dependencies.Output('output_container_route_sum', 'children'),
+#     [dash.dependencies.Input('route_total_sum', 'value')])
+# def update_route_sum(value):
+#     return ("Route total: " + str(value))
 
-#### Callback and update of map click
-@app.callback(
-    Output('click-data', 'children'),
-    [Input("map_route_counts", "clickData")])
-def display_click_data(clickData):
-    return json.dumps(clickData, indent=2)
+#### THIS ONE WORKS 
+# @app.callback(
+#     Output('graph-with-drop-down', 'figure'),
+#     [Input('drop_down', 'value')])
+# def update_figure(drop_down_bird):
+#     bird_object = Bird(drop_down_bird, 2009, 2018)
+#     bird_instance = bird_object.get_state_data()
+#     bird_map_instance = Bird.map_graph(bird_instance)
+#     bird_map_instance.update_layout(transition_duration=500)
+#     return bird_map_instance
+
+#### THIS doesn't work but it has the route instance I needed
+# @app.callback(
+#     [Output('graph-with-drop-down', 'figure'),
+#     Output('graph-with-input-box', 'figure')]
+#     [Input('drop_down', 'value'),
+#     Input('range_slider', 'value'),
+#     Input('input_box', 'value')])
+# def update_route(drop_down_bird, input_box_route):
+#     route_object = Route(drop_down_bird, 1966, 2018, input_box_route) 
+#     route_instance = route_object.get_route_data()
+#     route_graph_instance = Route.year_graph(route_instance)
+#     route_graph_instance.update_layout(transition_duration=500)
+#     return route_graph_instance
+
+
+layout = dbc.Row([column1, column2])
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
